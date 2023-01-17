@@ -2,10 +2,6 @@
     "name": "opencart-plugins/extension-installer",
     "description": "Custom Composer Installer for installing OpenCart Extensions",
     "type": "composer-plugin",
-    "require": {
-        "composer-plugin-api": "~2",
-        "symfony/filesystem": "^v5.4.13"
-    },
     "license": "MIT",
     "authors": [
         {
@@ -13,6 +9,14 @@
             "email": "gat@silktech.gr"
         }
     ],
+    "require": {
+        "composer-plugin-api": "^1.1 || ^2.0",
+        "symfony/filesystem": "^v5.4.13"
+    },
+    "require-dev": {
+        "composer/composer": "^1.9 || ^2.0",
+        "phpunit/phpunit": "^9"
+    },
     "autoload": {
         "psr-4": { 
             "Opencart\\Extension\\": "src/"
@@ -25,10 +29,6 @@
     },
     "extra": {
         "class": "Opencart\\Extension\\InstallerPlugin"
-    },
-    "require-dev": {
-        "composer/composer": "~2",
-        "phpunit/phpunit": "~9"
     },
     "minimum-stability": "dev"
 }

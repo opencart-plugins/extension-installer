@@ -4,3 +4,4 @@
 /.vscode
 
 .phpunit.result.cache
+composer.lock
