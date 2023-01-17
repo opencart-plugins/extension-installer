@@ -3,7 +3,8 @@
     "description": "Custom Composer Installer for installing OpenCart Extensions",
     "type": "composer-plugin",
     "require": {
-        "composer-plugin-api": "^2.0"
+        "composer-plugin-api": "^2.0",
+        "symfony/filesystem": "^5.4.13"
     },
     "license": "MIT",
     "authors": [
