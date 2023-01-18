@@ -18,7 +18,7 @@ class Installer extends LibraryInstaller
         }
 
         // OC directory "upload" is root dir
-        return './';
+        return 'upload';
     }
 
     /**
