@@ -11,7 +11,7 @@
     ],
     "require": {
         "composer-plugin-api": "^1.1 || ^2.0",
-        "symfony/filesystem": "^v5.4.13"
+        "opencart/opencart": ">=2.2 <4"
     },
     "require-dev": {
         "composer/composer": "^1.9 || ^2.0",
@@ -19,12 +19,12 @@
     },
     "autoload": {
         "psr-4": { 
-            "Opencart\\Extension\\": "src/"
+            "Opencart\\Extension\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Opencart\\Extension\\Tests\\": "tests/"
+            "Opencart\\Extension\\Tests\\": "tests"
         }
     },
     "extra": {
