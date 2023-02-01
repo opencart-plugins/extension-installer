@@ -5,7 +5,6 @@ namespace Opencart\Extension;
 use Composer\Installer\LibraryInstaller;
 use Composer\Package\PackageInterface;
 use Composer\Repository\InstalledRepositoryInterface;
-use DirectoryIterator;
 use Symfony\Component\Filesystem\Filesystem;
 
 class Installer extends LibraryInstaller
@@ -46,23 +45,10 @@ class Installer extends LibraryInstaller
 
         if (isset($extra['mappings']) && is_array($extra['mappings'])) {
             foreach($extra['mappings'] as $mapping) {
-                if($mapping == '*') {
-                    $dir = new DirectoryIterator($sourceDir);
+                $source = $sourceDir . "/" . $mapping;
+                $target = $targetDir . "/" . $mapping;
 
-                    foreach ($dir as $file) {
-                        if ($file->isFile()) {
-                            $fileName = $file->getFilename() . '.' . $file->getExtension();
-                            $source = $sourceDir . "/" . $fileName;
-                            $target = $targetDir . "/" . $fileName;
-                            $filesystem->copy($source, $target, true);
-                        }
-                    }
-                } else {
-                    $source = $sourceDir . "/" . $mapping;
-                    $target = $targetDir . "/" . $mapping;
-
-                    $filesystem->copy($source, $target, true);
-                }
+                $filesystem->copy($source, $target, true);
             }
         }
     }
