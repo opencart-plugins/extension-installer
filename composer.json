@@ -28,7 +28,10 @@
         }
     },
     "extra": {
-        "class": "Opencart\\Extension\\InstallerPlugin"
+        "class": "Opencart\\Extension\\InstallerPlugin",
+        "branch-alias": {
+            "dev-master": "1.x-dev"
+        }
     },
     "minimum-stability": "dev"
 }
