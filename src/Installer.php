@@ -65,7 +65,9 @@ class Installer extends LibraryInstaller
                 $source = $sourceDir."/".$mapping;
                 $target = $targetDir."/".$mapping;
 
-                $filesystem->copy($source, $target, true);
+                if($filesystem->exists($source)) {
+                    $filesystem->copy($source, $target, true);
+                }
             }
         }
     }
@@ -82,14 +84,19 @@ class Installer extends LibraryInstaller
         if (isset($extra['mappings']) && is_array($extra['mappings'])) {
             foreach ($extra['mappings'] as $mapping) {
                 $target = $targetDir."/".$mapping;
-                $filesystem->remove($target);
+
+                if($filesystem->exists($target)) {
+                    $filesystem->remove($target);
+                }
             }
         }
 
         $name = strtolower(str_replace(array("/", "-"), "_", $package->getName()));
         $targetOCMod = $this->getOpenCartDir()."/system/".$name.".ocmod.xml";
 
-        $filesystem->remove($targetOCMod);
+        if($filesystem->exists($targetOCMod)) {
+            $filesystem->remove($targetOCMod);
+        }
     }
 
     /**
@@ -184,7 +191,9 @@ class Installer extends LibraryInstaller
 
         $target = $this->getOpenCartDir()."/system/".$name.".ocmod.xml";
 
-        $filesystem->copy($src, $target, true);
+        if($filesystem->exists($src)) {
+            $filesystem->copy($src, $target, true);
+        }
     }
 
     /**
