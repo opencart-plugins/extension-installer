@@ -24,10 +24,10 @@ class Installer extends LibraryInstaller
     /**
      * Get src path of module
      */
-    public function getSrcDir($installPath, array $extra)
+    public function getSrcDir($installPath, array $extra): string
     {
         if (isset($extra['src-dir']) && is_string($extra['src-dir'])) {
-            $installPath .= "/" . $extra['src-dir'];
+            $installPath .= "/".$extra['src-dir'];
         } else { // default
             $installPath .= "/src/upload";
         }
@@ -36,42 +36,68 @@ class Installer extends LibraryInstaller
     }
 
     /**
-     * @param array $extra extra array
+     * Get admin folder path of core project
+     */
+    public function getAdminDir()
+    {
+        $extra = $this->composer->getPackage()->getExtra();
+
+        if (isset($extra['admin-dir'])) {
+            return $extra['admin-dir'];
+        }
+
+        // OC admin directory "admin" is admin dir
+        return 'admin';
+    }
+
+    /**
+     * @param $sourceDir
+     * @param $targetDir
+     * @param  array  $extra
+     * @return void
      */
     public function copyFiles($sourceDir, $targetDir, array $extra)
     {
         $filesystem = new Filesystem();
 
-
         if (isset($extra['mappings']) && is_array($extra['mappings'])) {
-            foreach($extra['mappings'] as $mapping) {
-                $source = $sourceDir . "/" . $mapping;
-                $target = $targetDir . "/" . $mapping;
+            foreach ($extra['mappings'] as $mapping) {
+                $source = $sourceDir."/".$mapping;
+                $target = $targetDir."/".$mapping;
 
                 $filesystem->copy($source, $target, true);
             }
         }
     }
-    /**
-     * @param array $extra extra array
-     */
-    public function removeFiles($targetDir, array $extra) {
-	     $filesystem = new Filesystem();
 
-	    if (isset($extra['mappings']) && is_array($extra['mappings'])) {
-		    foreach($extra['mappings'] as $mapping) {
-			    $target = $targetDir . "/" . $mapping;
-			    $filesystem->remove($target);
-		    }
-	    }
+    /**
+     * @param $targetDir
+     * @param  PackageInterface  $package
+     */
+    public function removeFiles($targetDir, PackageInterface $package)
+    {
+        $filesystem = new Filesystem();
+
+        $extra = $package->getExtra();
+        if (isset($extra['mappings']) && is_array($extra['mappings'])) {
+            foreach ($extra['mappings'] as $mapping) {
+                $target = $targetDir."/".$mapping;
+                $filesystem->remove($target);
+            }
+        }
+
+        $name = strtolower(str_replace(array("/", "-"), "_", $package->getName()));
+        $targetOCMod = $this->getOpenCartDir()."/system/".$name.".ocmod.xml";
+
+        $filesystem->remove($targetOCMod);
     }
 
     /**
-     * @param string $srcDir Src Directory of installed package
-     * @param string $name Name of installed package
-     * @param array $extra extra array
+     * @param  string  $srcDir  Src Directory of installed package
+     * @param  string  $name  Name of installed package
+     * @param  array  $extra  extra array
      */
-    public function runExtensionInstaller($srcDir, $name, array $extra)
+    public function runExtensionInstaller(string $srcDir, string $name, array $extra)
     {
         $xml = (isset($extra['installers']) && isset($extra['installers']['xml'])) ? $extra['installers']['xml'] : '';
         $php = (isset($extra['installers']) && isset($extra['installers']['php'])) ? $extra['installers']['php'] : '';
@@ -79,34 +105,35 @@ class Installer extends LibraryInstaller
         if (!empty($php)) {
             $this->io->write("    <info>Start running php installer.</info>");
             try {
-                if ($this->runPhpExtensionInstaller($srcDir ."/". $php)) {
-	                $this->io->write("    <info>Successfully runned php installer.</info>");
+                if ($this->runPhpExtensionInstaller($srcDir."/".$php)) {
+                    $this->io->write("    <info>Successfully runned php installer.</info>");
+                } else {
+                    $this->io->write("    <error>Php installer not runned!</error>");
                 }
-				else {
-					$this->io->write("    <error>Php installer not runned!</error>");
-				}
 
             } catch (\Exception $e) {
-                $this->io->write("    <error>Error while running php extension installer. " . $e->getMessage() . "</error>");
+                $this->io->write("    <error>Error while running php extension installer. ".$e->getMessage()."</error>");
             }
         }
 
         if (!empty($xml)) {
             $this->io->write("    <info>Start running xml installer.</info>");
             try {
-                $this->runXmlExtensionInstaller($srcDir ."/". $xml, $name);
+                $this->runXmlExtensionInstaller($srcDir."/".$xml, $name);
                 $this->io->write("    <info>Successfully runned xml installer.</info>");
             } catch (\Exception $e) {
-                $this->io->write("    <error>Error while running xml extension installer. " . $e->getMessage() . "</error>");
+                $this->io->write("    <error>Error while running xml extension installer. ".$e->getMessage()."</error>");
             }
         }
     }
 
-    public function runPhpExtensionInstaller($file) {
-    	$file = str_replace('\\', '/', $file); // Windows systems address fix
+    public function runPhpExtensionInstaller($file)
+    {
+        $file = str_replace('\\', '/', $file); // Windows systems address fix
 
         $registry = null;
         $openCartDir = $this->getOpenCartDir();
+        $adminDir = $this->getAdminDir();
 
         // opencart not yet available
         if (!is_dir($openCartDir)) {
@@ -117,40 +144,45 @@ class Installer extends LibraryInstaller
         chdir($openCartDir);
 
         // only trigger install iff config is available
-        if (is_file('admin/config.php') && filesize('admin/config.php') > 0) { // jd todo filesize(config.php) > 0, else cancel extension install https://app.clickup.com/t/e50d7e
-        	if(!function_exists('modification')) {
-		        $_SERVER['SERVER_PORT'] = 80;
-		        $_SERVER['SERVER_PROTOCOL'] = 'CLI';
-		        $_SERVER['REQUEST_METHOD'] = 'GET';
-		        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+        if (is_file($adminDir.'/config.php') && filesize($adminDir.'/config.php') > 0) {
+            if (!function_exists('modification')) {
+                $_SERVER['SERVER_PORT'] = 80;
+                $_SERVER['SERVER_PROTOCOL'] = 'CLI';
+                $_SERVER['REQUEST_METHOD'] = 'GET';
+                $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
 
-		        ob_start();
-		        require_once('admin/config.php');
-		        include('system/startup.php');
-		        $application_config = 'admin';
-		        include('system/framework.php');
-		        ob_end_clean();
+                ob_start();
+                require_once($adminDir.'/config.php');
+                include('system/startup.php');
+                $application_config = 'admin';
+                include('system/framework.php');
+                ob_end_clean();
 
-		        chdir($tmpDir);
+                chdir($tmpDir);
 
-		        // $registry comes from system/framework.php
-		        NaivePhpInstaller::$registry = $registry;
-	        }
-	        $installer = new NaivePhpInstaller();
-	        $installer->install($file);
-			$installed = true;
-	    }
-	    chdir($tmpDir);
-		if(!empty($installed)) return true;
-		else return false;
+                // $registry comes from system/framework.php
+                NaivePhpInstaller::$registry = $registry;
+            }
+
+            $installer = new NaivePhpInstaller();
+            $installer->install($file);
+            $installed = true;
+        }
+        chdir($tmpDir);
+        if (!empty($installed)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
-    public function runXmlExtensionInstaller($src, $name) {
-    	$this->io->write("<info>XML installer name - {$name}</info>");
-        $name = strtolower(str_replace(array("/","-"),"_",$name));
+    public function runXmlExtensionInstaller($src, $name)
+    {
+        $this->io->write("    <info>XML installer name - {$name}</info>");
+        $name = strtolower(str_replace(array("/", "-"), "_", $name));
         $filesystem = new Filesystem();
 
-        $target = $this->getOpenCartDir() . "/system/" . $name . ".ocmod.xml";
+        $target = $this->getOpenCartDir()."/system/".$name.".ocmod.xml";
 
         $filesystem->copy($src, $target, true);
     }
@@ -188,11 +220,11 @@ class Installer extends LibraryInstaller
      */
     public function uninstall(InstalledRepositoryInterface $repo, PackageInterface $package)
     {
-
         parent::uninstall($repo, $package);
 
-        // TODO: remove files from opencart
+        $openCartDir = $this->getOpenCartDir();
+
+        $this->removeFiles($openCartDir, $package);
 
     }
-
 }

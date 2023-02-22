@@ -11,7 +11,8 @@ class NaivePhpInstaller
         return self::$registry->get($name);
     }
 
-    public function install($file) {
+    public function install($file)
+    {
         include($file);
     }
 }
