@@ -102,7 +102,7 @@ class Installer extends LibraryInstaller
             }
         }
 
-        $name = strtolower(str_replace(array("/", "-"), "_", $package->getName()));
+        $name = strtolower(str_replace(["/", "-"], "_", $package->getName()));
         $targetOCMod = $this->getOpenCartDir()."/system/".$name.".ocmod.xml";
 
         if($filesystem->exists($targetOCMod)) {
@@ -197,7 +197,7 @@ class Installer extends LibraryInstaller
     public function runXmlExtensionInstaller($src, $name)
     {
         $this->io->write("    <info>XML installer name - {$name}</info>");
-        $name = strtolower(str_replace(array("/", "-"), "_", $name));
+        $name = strtolower(str_replace(["/", "-"], "_", $name));
         $filesystem = new Filesystem();
 
         $target = $this->getOpenCartDir()."/system/".$name.".ocmod.xml";
