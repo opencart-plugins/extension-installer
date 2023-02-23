@@ -51,6 +51,17 @@ class Installer extends LibraryInstaller
     }
 
     /**
+     * Replace admin directory from mapping file with custom admin directory
+     *
+     * @param string $path
+     * @return string
+     */
+    public function replaceAdminDir(string $path): string
+    {
+        return str_replace('admin', $this->getAdminDir(), $path);
+    }
+
+    /**
      * @param $sourceDir
      * @param $targetDir
      * @param  array  $extra
@@ -63,7 +74,7 @@ class Installer extends LibraryInstaller
         if (isset($extra['mappings']) && is_array($extra['mappings'])) {
             foreach ($extra['mappings'] as $mapping) {
                 $source = $sourceDir."/".$mapping;
-                $target = $targetDir."/".$mapping;
+                $target = $targetDir."/".$this->replaceAdminDir($mapping);
 
                 if($filesystem->exists($source)) {
                     $filesystem->copy($source, $target, true);
@@ -83,7 +94,7 @@ class Installer extends LibraryInstaller
         $extra = $package->getExtra();
         if (isset($extra['mappings']) && is_array($extra['mappings'])) {
             foreach ($extra['mappings'] as $mapping) {
-                $target = $targetDir."/".$mapping;
+                $target = $targetDir."/".$this->replaceAdminDir($mapping);
 
                 if($filesystem->exists($target)) {
                     $filesystem->remove($target);
