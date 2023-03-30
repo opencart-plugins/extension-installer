@@ -58,11 +58,15 @@ class Installer extends LibraryInstaller
      */
     public function replaceAdminDir(string $path): string
     {
-        if(strncmp($this->getAdminDir(), 'admin', strlen('admin')) === 0) {
-            return preg_replace('admin', $this->getAdminDir(), $path, 1);
+        $explodePath = explode('/', $path);
+
+        if($explodePath[0] == 'admin') {
+            $explodePath[0] = $this->getAdminDir();
+
+            return implode('/', $explodePath);
         }
 
-        return $this->getAdminDir();
+        return $path;
     }
 
     /**
